@@ -40,15 +40,14 @@ def koneksi():
 def SetIp(klien):
     st.subheader("Konfigurasi IP Address")
 
-    # Ambil daftar interface dari router MikroTik
     stdin, stdout, stderr = klien.exec_command("/interface print")
     interfaces_output = stdout.read().decode()
 
     interfaces = []
-    for line in interfaces_output.strip().split("\n")[1:]:  # Abaikan baris pertama (header)
-        parts = line.split()  # Pisahkan berdasarkan spasi
-        if len(parts) > 1:  # Pastikan ada cukup kolom
-            interface_name = parts[2]  # Ambil kolom kedua sebagai nama interface
+    for line in interfaces_output.strip().split("\n")[1:]:  
+        parts = line.split()  
+        if len(parts) > 1:  
+            interface_name = parts[2]  
             interfaces.append(interface_name)
     ip_address = st.text_input("Masukkan IP Address:")
     interface = st.selectbox("Pilih Interface:", interfaces)
