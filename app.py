@@ -30,25 +30,30 @@ def koneksi():
     if submit:
         if not (st.session_state['host'] and st.session_state['user'] and st.session_state['psw']):
             st.error("Mohon isi field login")
-            return
+            
         if koneksi_ssh():
             st.success(f"Berhasil Terhubung ke {st.session_state['host']}:{st.session_state['port']}")
             st.session_state["logged_in"] = True
+            st.rerun()
         else:
           st.error(f"Gagal Terhubung")
 
+#konfigurasi ip address
 def SetIp(klien):
     st.subheader("Konfigurasi IP Address")
 
     stdin, stdout, stderr = klien.exec_command("/interface print")
     interfaces_output = stdout.read().decode()
+    stdout.read()
+    
 
     interfaces = []
-    for line in interfaces_output.strip().split("\n")[1:]:  
+    for line in interfaces_output.strip().split("\n")[2:]:  
         parts = line.split()  
         if len(parts) > 1:  
             interface_name = parts[2]  
             interfaces.append(interface_name)
+            
     ip_address = st.text_input("Masukkan IP Address:")
     interface = st.selectbox("Pilih Interface:", interfaces)
 
@@ -56,13 +61,38 @@ def SetIp(klien):
         if ip_address and interface:
             command = f"/ip address add address={ip_address} interface={interface}"
             stdin, stdout, stderr = klien.exec_command(command)
-            st.code("Berhasil")
+            stdout.read()
+            stderr.read()
+            st.success("Berhasil")
         else:
             st.error("Mohon isi IP Address dan pilih Interface")
 
+    
+    #list ip address 
+    stdin,stdout,stderr = klien.exec_command("/ip adddress print")
+    listip = stdout.read().decode()
+
+    
+    iplist = []
+    for line in listip.strip().split("\n")[0:]:  
+        parts = line.split()  
+        if len(parts) > 1:  
+            ip_name = parts[2]  
+            iplist.append(ip_name)
+
+    st.write(iplist)
+
+def wireless():
+    st.write("wireless")
+
+def dhcp():
+    st.write("dhcp")
+
+def firewall():
+    st.write("firewall")
 
 if "logged_in" in st.session_state:
-#   sidebar
+#sidebar
     klien = koneksi_ssh()
     with st.sidebar:
         st.title(":blue[NETISKI]")
@@ -73,17 +103,18 @@ if "logged_in" in st.session_state:
         if logout:
             if "logged_in" in st.session_state:
                 st.session_state.clear() 
-                st.experimental_rerun()
+                st.rerun()
+                klien.close()
 
 
     if menu == 'Setting IP':
         SetIp(klien)
     elif menu == 'Setting Wireless':
-        dashboard()
+        wireless()
     elif menu == 'Setting DHCP':
-        st.write('DHCP Configuration Menu')
+        dhcp()
     elif menu == 'Konfigurasi Firewall':
-        st.write('Firewall Configuration Menu')
+        firewall()
         
 else:
     koneksi()
