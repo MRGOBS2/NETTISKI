@@ -1,16 +1,97 @@
 import streamlit as st
 import paramiko as prm
+import pandas as pd
 
 #konfigurasi ip address
 def show(klien):
-    st.subheader("Konfigurasi IP Address")
+    title, popover = st.columns([8,2]) 
+    with title:
+        st.title("Konfigurasi IP Address")
+    with popover:
+        with st.popover("Status"):
+            st.write("D : Dynamic-IP diberikan secara dinamis atau otomatis")
+            st.write("X : Disabled-IP Address dinonaktifkan")
+            st.write("I : Invalid-IP Address tidak valid")
+            st.write("R : Aktif-IP Address aktif dan dapat digunakan")
 
-    #ambil interface
-    stdin, stdout, stderr = klien.exec_command("/interface print")
+    #list ip address 
+    stdin,stdout,stderr = klien.exec_command("/ip address print")
+    output = stdout.read().decode()
+    iplist = []
+    for lis in output.split("\n")[2:]:  
+        parts = lis.split()  
+        if len(parts) >= 4:  #pastikan data ada setidaknya 4 dari index,status,address,network,interface
+            if len(parts) == 5: #jika memiliki status
+                index = parts[0]
+                status = parts[1]  # Jika ada status (misal "X")
+                address = parts[2]
+                network = parts[3]
+                interface = parts[-1]
+            else:
+                index = parts[0]
+                status = ""  # Jika status kosong
+                address = parts[1]
+                network = parts[2]
+                interface = parts[-1]
+
+            if status == "":
+                status = "Aktif"
+            elif status == "D":
+                status = "Dynamic"
+            elif status == "X":
+                status = "Disabled"
+            elif status == "I":
+                status = "Invalid"
+            
+
+            iplist.append({
+                "index" : index,
+                "Address":address,
+                "Network":network,
+                "Interface" : interface,
+                "Status":status
+            })
+
+    a,b,c,d,e = st.columns(5)
+    a.write("**ADDRESS**")
+    b.write("**NETWORK**")
+    c.write("**INTERFACE**")
+    d.write("**STATUS**")
+    e.write("**AKSI**")
+
+    st.markdown(    #divider
+    """
+    <hr style="margin: 5px 0; border: 1px solid #666;" />
+    """,
+    unsafe_allow_html=True)
+
+    for i in iplist:
+        # st.write(f"address : {i["Address"]}")
+        address,network,interface,status,aksi = st.columns(5)
+        with address:
+            st.write(i["Address"])
+        with network:
+            st.write(i["Network"])
+        with interface:
+            st.write(i["Interface"])
+        with status:
+            st.write(i["Status"])
+        with aksi:
+            if st.button("Hapus", key=f"Edit for {i["Address"]}"): #edit button and key for every address
+                stdin,stdout,stderr = klien.exec_command(f"/ip address remove numbers={i["index"]}")
+                st.rerun()
+        
+    st.markdown(    #divider
+    """
+    <hr style="margin: 20px 0; border: 1px solid #666;" />
+    """,
+    unsafe_allow_html=True)
+    
+
+    #setting ip address    
+    stdin, stdout, stderr = klien.exec_command("/interface print") #ambil interface
     interfaces_output = stdout.read().decode()
-    stdout.read()
-    st.session_state.com = True
-
+    
     interfaces = []
     for line in interfaces_output.strip().split("\n")[2:]:  
         parts = line.split()  
@@ -18,56 +99,25 @@ def show(klien):
             interface_name = parts[2]  
             interfaces.append(interface_name)
             
-    ip_address = st.text_input("Masukkan IP Address:")
+    ip_address = st.text_input("Masukkan IP Address: ")
     interface = st.selectbox("Pilih Interface:", interfaces)
 
     if st.button("Set IP Address"):
         if ip_address and interface:
-            command = f"/ip address add address={ip_address} interface={interface}"
-            stdin, stdout, stderr = klien.exec_command(command)
-            st.success("Berhasil")
+            cek = ip_address.split(".")
+            if len(cek) == 4:
+                command = [
+                    f"/ip address add address={ip_address} interface={interface}",
+                    f"/ip firewall nat add chain=srcnat src-address={ip_address} action=masquerade"
+                ]
+                for i in command:
+                    klien.exec_command(i)
+                st.success("Berhasil")
+                st.rerun()
+            else:
+                st.warning("Mohon Masukkan format IP yang benar")
         else:
             st.error("Mohon isi IP Address dan pilih Interface")
 
      
-    #list ip address 
     
-
-    if "com" in st.session_state:
-        stdin,stdout,stderr = klien.exec_command("/ip address print")
-        output = stdout.read().decode()
-        iplist = []
-        for lis in output.split("\n")[2:]:  
-            parts = lis.split()  
-            if len(parts) >= 4:  # Pastikan data cukup untuk diambil
-                if len(parts) == 5:
-                    status = parts[1]  # Jika ada status (misal "X")
-                    address = parts[2]
-                    network = parts[3]
-                    interface = parts[4]
-                else:
-                    status = ""  # Jika status kosong
-                    address = parts[1]
-                    network = parts[2]
-                    interface = parts[3]
-
-                if status == "":
-                    status = "Aktif"
-                elif status == "D":
-                    status = "Dinamis"
-                elif status == "X":
-                    status == "Disable"
-                elif status == "I":
-                    status = "Invalid"
-                
-
-                iplist.append({
-                    "address":address,
-                    "network":network,
-                    "interface" : interface,
-                    "status":status
-                })
-        st.subheader("Daftar IP Address")
-        # cek = output.split("\n")[2:]
-        st.table(iplist)
-

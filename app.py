@@ -1,7 +1,7 @@
 import streamlit as st
 import paramiko as prm
 from streamlit_option_menu import option_menu
-from page import SetIp, setting, dhcp, firewall
+from page import SetIp, dhcp, firewall,wireless
 
 #koneksi ssh ke router
 def koneksi_ssh():
@@ -18,18 +18,22 @@ def koneksi_ssh():
   except Exception as e:
     return st.write("Silahkan Ulangi") 
 
-
-st.title("Masuk ke :red[Netiski]")
+def cke():
+    st.write("cakaka")
+    
+st.set_page_config(page_title="Netiski",page_icon="cekcek.png",layout="centered")
 
 #form koneksi ke router
 def koneksi():
-    st.session_state.host = st.text_input("Masukkan IP router: ")
-    st.session_state.user = st.text_input("Masukkan Username: ",)
-    st.session_state.psw = st.text_input("Masukkan Password: ", type="password")
+    st.title("Masuk ke :red[Netiski]")
+
+    st.session_state.host = st.text_input("Masukkan IP router")
+    st.session_state.user = st.text_input("Masukkan Username",)
+    st.session_state.psw = st.text_input("Masukkan Password", type="password")
     st.session_state.port = st.text_input("Masukkan Port (default 22)",22)
     submit = st.button("Connect")
 
-    if submit:
+    if submit: 
         if not (st.session_state.host and st.session_state.user and st.session_state.psw):
             st.error("Mohon isi form login")
             
@@ -44,29 +48,31 @@ if "logged_in" in st.session_state:
 #sidebar
     klien = koneksi_ssh()
     with st.sidebar:
-        st.title(":blue[NETISKI]")
-        menu = option_menu("Main Menu", ['Setting IP', 'Setting Wireless', 'Setting DHCP', 'Konfigurasi Firewall'], 
-                           icons=['house', 'gear', 'gear'], menu_icon="cast", default_index=0)
-        col1,col2 = st.columns(2)
-        with col1:
-            logout = st.button("Logout")
-            if logout:
-                if "logged_in" in st.session_state:
-                    st.session_state.clear() 
-                    st.rerun()
-                    klien.close()
-        with col2:
-            st.button("Setting")
+        st.image("cekcek.png",width=150)
+        menu = option_menu("NETISKI",['Setting IP', 'Setting Wireless', 'Setting DHCP', 'Konfigurasi Firewall'], 
+                           icons=['house', 'gear', 'gear','gear'], menu_icon="cast", default_index=0)
+        
+        logout = st.button("Logout")
+        if logout:
+            if "logged_in" in st.session_state:
+                st.session_state.clear() 
+                st.rerun()
+                klien.close()
+    
 
 
     if menu == 'Setting IP':
         SetIp.show(klien)
     elif menu == 'Setting Wireless':
-        setting.show()
+        wireless.show(klien)
     elif menu == 'Setting DHCP':
         dhcp.show(klien)
     elif menu == 'Konfigurasi Firewall':
         firewall.show(klien)
+    elif menu == 'Setting':
+        setting.show(klien)
         
 else:
     koneksi()
+
+
