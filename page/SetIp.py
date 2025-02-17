@@ -52,7 +52,7 @@ def show(klien):
                 "Status":status
             })
 
-    a,b,c,d,e = st.columns(5)
+    a,b,c,d,e = st.columns([2.5,2,2,1,2.5])
     a.write("**ADDRESS**")
     b.write("**NETWORK**")
     c.write("**INTERFACE**")
@@ -66,8 +66,7 @@ def show(klien):
     unsafe_allow_html=True)
 
     for i in iplist:
-        # st.write(f"address : {i["Address"]}")
-        address,network,interface,status,aksi = st.columns(5)
+        address,network,interface,status,aksi = st.columns([2.5,2,2,1,2.5])
         with address:
             st.write(i["Address"])
         with network:
@@ -77,9 +76,16 @@ def show(klien):
         with status:
             st.write(i["Status"])
         with aksi:
-            if st.button("Hapus", key=f"Edit for {i["Address"]}"): #edit button and key for every address
-                stdin,stdout,stderr = klien.exec_command(f"/ip address remove numbers={i["index"]}")
-                st.rerun()
+            hapus, edit = st.columns(2)
+             #edit button and key for every address
+            with hapus:                        
+                if st.button("Hapus", key=f"hapus for {i['Address']}"):
+                    stdin,stdout,stderr = klien.exec_command(f"/ip address remove numbers={i['index']}")
+                    st.rerun()
+            with edit:
+                if st.button("Edit", key=f"edit for {i['Address']}"):
+                    stdin,stdout,stderr = klien.exec_command(f"/ip address remove numbers={i['index']}")
+                    st.rerun()
         
     st.markdown(    #divider
     """
@@ -93,7 +99,7 @@ def show(klien):
     interfaces_output = stdout.read().decode()
     
     interfaces = []
-    for line in interfaces_output.strip().split("\n")[2:]:  
+    for line in interfaces_output.strip().split("\n")[3:]:  
         parts = line.split()  
         if len(parts) > 1:  
             interface_name = parts[2]  

@@ -1,7 +1,7 @@
 import streamlit as st
 import paramiko as prm
 from streamlit_option_menu import option_menu
-from page import SetIp, dhcp, firewall,wireless
+from page import SetIp, dhcp, firewall, wireless
 
 #koneksi ssh ke router
 def koneksi_ssh():
@@ -50,7 +50,7 @@ if "logged_in" in st.session_state:
     with st.sidebar:
         st.image("cekcek.png",width=150)
         menu = option_menu("NETISKI",['Setting IP', 'Setting Wireless', 'Setting DHCP', 'Konfigurasi Firewall'], 
-                           icons=['house', 'gear', 'gear','gear'], menu_icon="cast", default_index=0)
+                           icons=['globe', 'wifi', 'router','shield-slash'], menu_icon="cast", default_index=0)
         
         logout = st.button("Logout")
         if logout:
