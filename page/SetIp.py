@@ -76,16 +76,21 @@ def show(klien):
         with status:
             st.write(i["Status"])
         with aksi:
-            hapus, edit = st.columns(2)
+            hapus,edit = st.columns(2)
              #edit button and key for every address
             with hapus:                        
                 if st.button("Hapus", key=f"hapus for {i['Address']}"):
                     stdin,stdout,stderr = klien.exec_command(f"/ip address remove numbers={i['index']}")
                     st.rerun()
             with edit:
-                if st.button("Edit", key=f"edit for {i['Address']}"):
-                    stdin,stdout,stderr = klien.exec_command(f"/ip address remove numbers={i['index']}")
-                    st.rerun()
+                with st.popover("Edit"):
+                    edit_ip = st.text_input("Maukkan IP Address",key=f"Edit ip for {i['Address']}")
+                    edit_interface = st.text_input("Masukkan interface",key=f"Edit interface for {i['Address']}")  
+                    if st.button("Edit IP",key=f"tombol_edit_{i['Address']}"):
+                        klien.exec_command(f"/ip address set numbers={i['index']} address={i['Address']}")
+                        
+                
+                    
         
     st.markdown(    #divider
     """
