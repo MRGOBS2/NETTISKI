@@ -52,7 +52,7 @@ def show(klien):
                 "Status":status
             })
 
-    a,b,c,d,e = st.columns([2.5,2,2,1,2.5])
+    a,b,c,d,e = st.columns([2.5,2,1.5,1.3,2.5])
     a.write("**ADDRESS**")
     b.write("**NETWORK**")
     c.write("**INTERFACE**")
@@ -66,7 +66,7 @@ def show(klien):
     unsafe_allow_html=True)
 
     for i in iplist:
-        address,network,interface,status,aksi = st.columns([2.5,2,2,1,2.5])
+        address,network,interface,status,aksi = st.columns([2.5,2,1.5,1.3,2.5])
         with address:
             st.write(i["Address"])
         with network:
