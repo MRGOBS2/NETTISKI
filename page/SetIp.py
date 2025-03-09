@@ -34,14 +34,8 @@ def show(klien):
                 network = parts[2]
                 interface = parts[-1]
 
-            if status == "":
-                status = "Aktif"
-            elif status == "D":
-                status = "Dynamic"
-            elif status == "X":
-                status = "Disabled"
-            elif status == "I":
-                status = "Invalid"
+            status_map = {"": "Aktif", "D": "Dynamic", "X": "Disabled", "I": "Invalid"}
+            status = status_map.get(status, status) 
             
 
             iplist.append({
@@ -51,7 +45,6 @@ def show(klien):
                 "Interface" : interface,
                 "Status":status
             })
-
     a,b,c,d,e = st.columns([2.5,2,1.5,1.3,2.5])
     a.write("**ADDRESS**")
     b.write("**NETWORK**")
@@ -84,10 +77,12 @@ def show(klien):
                     st.rerun()
             with edit:
                 with st.popover("Edit"):
-                    edit_ip = st.text_input("Maukkan IP Address",key=f"Edit ip for {i['Address']}")
-                    edit_interface = st.text_input("Masukkan interface",key=f"Edit interface for {i['Address']}")  
+                    edit_ip = st.text_input("Maukkan IP Address",value=i['Address'],key=f"Edit ip for {i['Address']}")
+                    edit_interface = st.text_input("Masukkan interface(ether1,2,3,4)",value=i['Interface'],key=f"Edit interface for {i['Address']}")  
+                    
                     if st.button("Edit IP",key=f"tombol_edit_{i['Address']}"):
-                        klien.exec_command(f"/ip address set numbers={i['index']} address={i['Address']}")
+                        klien.exec_command(f"/ip address set numbers={i['index']} address={edit_ip} interface={edit_interface}")
+                        st.rerun()
                         
                 
                     
@@ -107,7 +102,7 @@ def show(klien):
     for line in interfaces_output.strip().split("\n")[3:]:  
         parts = line.split()  
         if len(parts) > 1:  
-            interface_name = parts[2]  
+            interface_name = parts[-3]  
             interfaces.append(interface_name)
             
     ip_address = st.text_input("Masukkan IP Address: ")
