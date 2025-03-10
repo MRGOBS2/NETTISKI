@@ -18,7 +18,7 @@ def show(klien):
 
     #Input dhcp
     inter = st.selectbox("Pilih Interface", interfaces)        
-    range = st.number_input("Masukkan Jumlah User",min_value=2)
+    range = st.number_input("Masukkan Jumlah User",min_value=2, max_value=250)
     st.caption("Maks : 250 User")
     start = st.text_input("Masukkan awal dhcp",1)   
     st.caption("Rekomendasi: Isi awal ip lebih tinggi dari gateway atau dibawahnya")
