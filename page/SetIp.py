@@ -9,10 +9,10 @@ def show(klien):
         st.title("Konfigurasi IP Address")
     with popover:
         with st.popover("Status"):
-            st.write("D : Dynamic-IP diberikan secara dinamis atau otomatis")
-            st.write("X : Disabled-IP Address dinonaktifkan")
-            st.write("I : Invalid-IP Address tidak valid")
-            st.write("R : Aktif-IP Address aktif dan dapat digunakan")
+            st.write("D : Dynamic - IP diberikan secara dinamis atau otomatis")
+            st.write("X : Disabled - IP Address dinonaktifkan")
+            st.write("I : Invalid - IP Address tidak valid")
+            st.write("R : Aktif - IP Address aktif dan dapat digunakan")
 
     #list ip address 
     stdin,stdout,stderr = klien.exec_command("/ip address print")

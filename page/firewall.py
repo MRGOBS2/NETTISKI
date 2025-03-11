@@ -48,33 +48,53 @@ def show(klien):
 
         time.sleep(1)
         st.rerun()
-
-    # coman = f'ip firewall filter pr '
-    # stdin,stdout,stderr = klien.exec_command(coman)
-    # outpurr = stdout.read().decode().strip().split('\n')
-    # st.write(outpurr)
-
+ 
+    # Ambil daftar blokir dari firewall
     coman = "/ip firewall filter print without-paging"
     stdin, stdout, stderr = klien.exec_command(coman)
     outpurr = stdout.read().decode().strip().split('\n')
 
-    # List untuk menyimpan hasil
     blocked_list = []
 
     for entry in outpurr:
-        if "Block" in entry:  # Mencari baris yang memiliki comment "Block ..."
-            parts = entry.split("Block")  
+        if "Block" in entry:  # Mencari baris dengan comment "Block"
+            parts = entry.split("Block")  # Pisahkan teks
             if len(parts) > 1:
-                blocked_item = parts[1].strip()  # Mengambil nama domain/IP
+                blocked_item = parts[1].strip()
                 blocked_list.append(blocked_item)
 
-    # Menampilkan di Streamlit
+    # Tampilkan daftar dalam bentuk tabel
     if blocked_list:
         st.write("### **Daftar IP & Domain yang Diblokir**")
         for item in blocked_list:
-            st.write(f"- {item}")
+            col1, col2 = st.columns([3, 1])
+            col1.write(f"- {item}")
+
+            # Tombol untuk menghapus blokir
+            if col2.button("Hapus", key=f"hapus_{item}"):
+                remove_block(klien, item)
+                time.sleep(1)
+                st.rerun()
     else:
         st.info("Tidak ada IP atau domain yang diblokir.")
+
+def remove_block(klien, item):
+
+    # Hapus dari address-list jika domain
+    remove_address_list = f'/ip firewall address-list remove [find address="{item}"]'
+    # Hapus dari filter jika IP
+    remove_filter = f'/ip firewall filter remove [find comment="Block {item}"]'
+
+    commands = [remove_address_list, remove_filter]
+
+    for command in commands:
+        stdin, stdout, stderr = klien.exec_command(command)
+        error = stderr.read().decode().strip()
+
+    if error:
+        st.error(f"Gagal menghapus blokir {item}: {error}")
+    else:
+        st.success(f"Berhasil menghapus blokir {item}")
 
 
     
