@@ -92,14 +92,16 @@ def show(klien):
                 remove_block(klien, item)
                 time.sleep(1)
                 st.rerun()
-    else:
-        st.info("Tidak ada IP atau domain yang diblokir.")
-    
-    st.markdown(    #divider
+        st.markdown(    #divider
     """
     <hr style="margin: 5px 0; border: 1px solid #666;" />
     """,
-    unsafe_allow_html=True)
+    unsafe_allow_html=True)    
+
+    else:
+        st.info("Tidak ada IP atau domain yang diblokir.")
+    
+  
 
 def remove_block(klien, item):
     # Hapus dari address-list jika domain
