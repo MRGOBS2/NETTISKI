@@ -18,18 +18,18 @@ def show(klien):
     stdin,stdout,stderr = klien.exec_command("/ip address print")
     output = stdout.read().decode()
     iplist = []
-    for lis in output.split("\n")[2:]:  
+    for lis in output.split("\n")[3:]:  
         parts = lis.split()  
-        if len(parts) >= 4:  #pastikan data ada setidaknya 4 dari index,status,address,network,interface
-            if len(parts) == 5: #jika memiliki status
+        if len(parts) >= 4:
+            if len(parts) == 5: 
                 index = parts[0]
-                status = parts[1]  # Jika ada status (misal "X")
+                status = parts[1]  
                 address = parts[2]
                 network = parts[3]
                 interface = parts[-1]
             else:
                 index = parts[0]
-                status = ""  # Jika status kosong
+                status = ""  
                 address = parts[1]
                 network = parts[2]
                 interface = parts[-1]
@@ -37,7 +37,6 @@ def show(klien):
             status_map = {"": "Aktif", "D": "Dynamic", "X": "Disabled", "I": "Invalid"}
             status = status_map.get(status, status) 
             
-
             iplist.append({
                 "index" : index,
                 "Address":address,
@@ -52,7 +51,7 @@ def show(klien):
     d.write("**STATUS**")
     e.write("**AKSI**")
 
-    st.markdown(    #divider
+    st.markdown(
     """
     <hr style="margin: 5px 0; border: 1px solid #666;" />
     """,
@@ -70,7 +69,6 @@ def show(klien):
             st.write(i["Status"])
         with aksi:
             hapus,edit = st.columns(2)
-             #edit button and key for every address
             with hapus:                        
                 if st.button("Hapus", key=f"hapus for {i['Address']}"):
                     stdin,stdout,stderr = klien.exec_command(f"/ip address remove numbers={i['index']}")
@@ -83,27 +81,26 @@ def show(klien):
                     if st.button("Edit IP",key=f"tombol_edit_{i['Address']}"):
                         klien.exec_command(f"/ip address set numbers={i['index']} address={edit_ip} interface={edit_interface}")
                         st.rerun()
-                        
-                
-                    
-        
-    st.markdown(    #divider
+
+    st.markdown(
     """
     <hr style="margin: 20px 0; border: 1px solid #666;" />
     """,
     unsafe_allow_html=True)
     
-
     #setting ip address    
     stdin, stdout, stderr = klien.exec_command("/interface print") #ambil interface
     interfaces_output = stdout.read().decode()
     
     interfaces = []
-    for line in interfaces_output.strip().split("\n")[3:]:  
-        parts = line.split()  
-        if len(parts) > 1:  
-            interface_name = parts[-3]  
+    for line in interfaces_output.strip().split("\n")[3:]:
+        parts = line.split()
+        
+        # Filter hanya baris yang memiliki format yang benar
+        if len(parts) > 3 and not any(c in parts for c in [";", "defconf"]):
+            interface_name = parts[2]
             interfaces.append(interface_name)
+
             
     ip_address = st.text_input("Masukkan IP Address: ")
     interface = st.selectbox("Pilih Interface:", interfaces)
@@ -111,7 +108,7 @@ def show(klien):
     if st.button("Set IP Address"):
         if ip_address and interface:
             cek = ip_address.split(".")
-            if len(cek) == 4:
+            if len(cek) == 4 :
                 command = [
                     f"/ip address add address={ip_address} interface={interface}",
                     f"/ip firewall nat add chain=srcnat src-address={ip_address} action=masquerade"
@@ -124,6 +121,3 @@ def show(klien):
                 st.warning("Mohon Masukkan format IP yang benar")
         else:
             st.error("Mohon isi IP Address dan pilih Interface")
-
-     
-    

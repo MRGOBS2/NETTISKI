@@ -43,6 +43,7 @@ def show(klien):
                                f"mode=ap-bridge security-profile={profile_name}")
 
             st.success(f"✅ Wireless {ssid} pada interface {interface} berhasil dikonfigurasi.")
-
+            st.rerun()
+            
         except Exception as e:
             st.error(f"⚠️ Gagal konfigurasi Wireless: {str(e)}")

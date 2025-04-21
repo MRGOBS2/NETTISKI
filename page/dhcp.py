@@ -27,13 +27,33 @@ def show(klien):
 
     stdin,stdout,stderr = klien.exec_command(f"/ip address print where interface={inter}")
     output = stdout.read().decode()
-    splite = output.split("\n")[2] #pisahkan berdasarkan baris lalu ambil baris index ke-2 
+    splite = output.split("\n")[2:]  
 
-    address_for_dhcp = splite.split()[-3].split("/")[0] #ip address ether atau gateway
-    network_for_dhcp = splite.split()[-2] #ip network
+    if len(splite) < 1:
+        st.error("Tidak dapat menemukan IP Address pada interface ini.")
+        return
 
-    ipad = address_for_dhcp.split(".") #ambil address -> pisah berdasarkan titik
-    prefix = f"{ipad[0]}.{ipad[1]}.{ipad[2]}" # 3 oktet pertama ip
+    try:
+        for line in splite:
+            parts = line.split()
+            if len(parts) >= 3:
+                address_for_dhcp = parts[1].split("/")[0]  # Pastikan formatnya benar
+                network_for_dhcp = parts[2]  # Ambil network yang sesuai
+                break  # Ambil hanya IP pertama yang ditemukan
+        else:
+            st.error("Format IP Address tidak sesuai, coba cek konfigurasi.")
+            return
+    except IndexError:
+        st.error("Gagal membaca data IP Address dari router.")
+        return
+
+    if len(address_for_dhcp.split(".")) == 4:
+        ipad = address_for_dhcp.split(".")
+        prefix = f"{ipad[0]}.{ipad[1]}.{ipad[2]}"  # 3 oktet pertama ip
+    else:
+        st.error("Format IP Address tidak valid.")
+        return
+
 
     range_start = f"{prefix}.{start}"
     count = int(start) + int(range) - 1
